@@ -3,7 +3,7 @@
 from typing import Dict, Any
 from langchain_core.messages import AIMessage
 
-from src.graph import FormState
+from src.types import FormState
 from src.utils import (
     get_field,
     get_last_user_message,
@@ -38,6 +38,15 @@ def set_config(config: AgentConfig):
 
 def get_mode_for_node(node: str, state: FormState) -> str:
     """Determine mode for a specific node (hybrid mode logic)."""
+    # Check if state has explicit mode set
+    state_mode = state.get("mode")
+    if state_mode and state_mode in ["speed", "quality"]:
+        if _config.default_mode != "hybrid":
+            return state_mode if state_mode == _config.default_mode else _config.default_mode
+        # In hybrid mode, still respect state mode for testing
+        if state_mode == "speed":
+            return "speed"
+    
     if _config.default_mode != "hybrid":
         return _config.default_mode
     
