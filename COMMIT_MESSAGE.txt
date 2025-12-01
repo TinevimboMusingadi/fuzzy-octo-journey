@@ -1,0 +1,42 @@
+feat: Implement Dynamic Intake Form Agent with LangGraph
+
+Initial implementation of dual-mode intake form agent architecture:
+
+Core Features:
+- Dual-mode design: Speed mode (~50ms/turn) and Quality mode (~800ms/turn)
+- Hybrid mode with intelligent mode switching
+- Complete LangGraph implementation with 6 nodes:
+  * ASK: Generate questions for form fields
+  * PROCESS: Extract structured values from user input
+  * VALIDATE: Validate extracted values
+  * CLARIFY: Generate clarification requests
+  * ANNOTATE: Detect and add notes to responses
+  * ADVANCE: Move to next field with conditional logic
+
+Implementation Details:
+- FormState type definition with TypedDict
+- Speed mode: Template-based questions, regex extraction, rule validation
+- Quality mode: LLM-powered generation and validation
+- Comprehensive validation system for all field types
+- Conditional field display logic
+- Error handling and fallback mechanisms
+
+Testing:
+- 71 unit tests covering all components
+- Tests for validation, modes, nodes, utils, and graph
+- All tests passing
+- pytest configuration included
+
+Project Structure:
+- src/: Core implementation
+- tests/: Comprehensive test suite
+- Configuration management with AgentConfig
+- Interactive demo in main.py
+- Documentation in README and QUICKSTART
+
+Dependencies:
+- LangGraph >= 0.2.0
+- LangChain >= 0.3.0
+- LangChain OpenAI >= 0.2.0
+- pytest for testing
+

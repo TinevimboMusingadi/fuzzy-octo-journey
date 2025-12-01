@@ -17,13 +17,27 @@ pip install -r requirements.txt
 
 2. Set up environment variables:
 ```bash
-cp .env.example .env
-# Add your OPENAI_API_KEY
+# Create .env file with your Google API key:
+GOOGLE_API_KEY=your_api_key_here
+DEFAULT_MODE=hybrid
+LLM_MODEL=gemini-1.5-flash
+LLM_PROVIDER=google
+LLM_TEMPERATURE=0.3
 ```
 
 3. Run tests:
 ```bash
 pytest tests/ -v
+```
+
+4. Run the interactive demo:
+```bash
+# From project root:
+python src/main.py
+
+# Or from src directory:
+cd src
+python main.py
 ```
 
 ## Project Structure

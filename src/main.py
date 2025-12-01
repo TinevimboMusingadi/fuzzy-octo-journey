@@ -1,6 +1,15 @@
 """Main entry point for the intake form agent."""
 
 import os
+import sys
+from pathlib import Path
+
+# Add project root to path if running from src directory
+if Path(__file__).parent.name == "src":
+    project_root = Path(__file__).parent.parent
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
+
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
 from src.graph import create_intake_graph
@@ -56,7 +65,9 @@ def run_interactive_demo():
     # Load configuration
     config = AgentConfig(
         default_mode=os.getenv("DEFAULT_MODE", "hybrid"),
-        llm_model=os.getenv("LLM_MODEL", "gpt-4o-mini")
+        llm_model=os.getenv("LLM_MODEL", "gemini-1.5-flash"),
+        llm_provider=os.getenv("LLM_PROVIDER", "google"),
+        google_api_key=os.getenv("GOOGLE_API_KEY")
     )
     set_config(config)
     

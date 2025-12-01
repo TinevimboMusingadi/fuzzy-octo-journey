@@ -22,6 +22,8 @@ class AgentConfig:
     fallback_on_error: bool = True
     
     # LLM settings
-    llm_model: str = "gpt-4o-mini"  # Faster, cheaper for structured tasks
+    llm_model: str = "gemini-1.5-flash"  # Fast and efficient Gemini model
     llm_temperature: float = 0.3    # Lower for consistency
+    llm_provider: Literal["google", "openai"] = "google"  # API provider
+    google_api_key: Optional[str] = None  # Will use GOOGLE_API_KEY env var if None
 

@@ -2,28 +2,37 @@
 
 import re
 import json
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Union
 from dateutil import parser as date_parser
 
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
+from langchain_core.language_models.chat_models import BaseChatModel
 
 from src.utils import summarize_context
 from src.config import AgentConfig
 
 
 # Initialize LLM (lazy loading)
-_llm: Optional[ChatOpenAI] = None
+_llm: Optional[BaseChatModel] = None
 
 
-def get_llm(config: AgentConfig) -> ChatOpenAI:
+def get_llm(config: AgentConfig) -> BaseChatModel:
     """Get or create LLM instance."""
     global _llm
     if _llm is None:
-        _llm = ChatOpenAI(
-            model=config.llm_model,
-            temperature=config.llm_temperature
-        )
+        if config.llm_provider == "google":
+            _llm = ChatGoogleGenerativeAI(
+                model=config.llm_model,
+                temperature=config.llm_temperature,
+                google_api_key=config.google_api_key
+            )
+        else:
+            _llm = ChatOpenAI(
+                model=config.llm_model,
+                temperature=config.llm_temperature
+            )
     return _llm
 
 
