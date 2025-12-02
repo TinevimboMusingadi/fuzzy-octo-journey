@@ -1,0 +1,51 @@
+[
+  {
+    "id": "simple_happy_path",
+    "description": "Simple inputs, no clarification needed",
+    "inputs": [
+      "John Doe",
+      "john@example.com",
+      "555-123-4567",
+      "25"
+    ],
+    "expected_values": {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "phone": "(555) 123-4567",
+      "age": 25.0
+    },
+    "mode": "speed"
+  },
+  {
+    "id": "complex_input_quality",
+    "description": "Complex inputs requiring LLM extraction",
+    "inputs": [
+      "My name is Sarah Connor",
+      "You can reach me at sarah.connor@skynet.com",
+      "Call me at 555-987-6543",
+      "I am thirty years old"
+    ],
+    "expected_values": {
+      "name": "Sarah Connor",
+      "email": "sarah.connor@skynet.com",
+      "phone": "(555) 987-6543",
+      "age": 30.0
+    },
+    "mode": "quality"
+  },
+  {
+    "id": "edge_case_missing_info",
+    "description": "User skips optional fields",
+    "inputs": [
+      "Jane Smith",
+      "jane@example.com",
+      "skip",
+      "skip"
+    ],
+    "expected_values": {
+      "name": "Jane Smith",
+      "email": "jane@example.com"
+    },
+    "mode": "speed"
+  }
+]

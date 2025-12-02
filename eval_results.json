@@ -1,0 +1,102 @@
+[
+  {
+    "id": "simple_happy_path",
+    "passed": true,
+    "duration": 0.1575944423675537,
+    "failures": [],
+    "collected": {
+      "name": {
+        "value": "John Doe",
+        "raw": "John Doe",
+        "confidence": 1.0,
+        "extraction_method": "regex",
+        "notes": []
+      },
+      "email": {
+        "value": "john@example.com",
+        "raw": "john@example.com",
+        "confidence": 1.0,
+        "extraction_method": "regex",
+        "notes": []
+      },
+      "phone": {
+        "value": "(555) 123-4567",
+        "raw": "555-123-4567",
+        "confidence": 1.0,
+        "extraction_method": "regex",
+        "notes": []
+      },
+      "age": {
+        "value": 25.0,
+        "raw": "25",
+        "confidence": 1.0,
+        "extraction_method": "regex",
+        "notes": []
+      }
+    }
+  },
+  {
+    "id": "complex_input_quality",
+    "passed": true,
+    "duration": 0.4160587787628174,
+    "failures": [],
+    "collected": {
+      "name": {
+        "value": "Sarah Connor",
+        "confidence": 0.95,
+        "raw": "My name is Sarah Connor",
+        "extraction_method": "llm",
+        "notes": []
+      },
+      "email": {
+        "value": "sarah.connor@skynet.com",
+        "confidence": 0.95,
+        "raw": "You can reach me at sarah.connor@skynet.com",
+        "extraction_method": "llm",
+        "notes": []
+      },
+      "phone": {
+        "value": "(555) 987-6543",
+        "confidence": 0.95,
+        "raw": "Call me at 555-987-6543",
+        "extraction_method": "llm",
+        "notes": []
+      },
+      "age": {
+        "value": 30.0,
+        "confidence": 0.95,
+        "raw": "I am thirty years old",
+        "extraction_method": "llm",
+        "notes": []
+      }
+    }
+  },
+  {
+    "id": "edge_case_missing_info",
+    "passed": true,
+    "duration": 0.09720349311828613,
+    "failures": [],
+    "collected": {
+      "name": {
+        "value": "Jane Smith",
+        "raw": "Jane Smith",
+        "confidence": 1.0,
+        "extraction_method": "regex",
+        "notes": []
+      },
+      "email": {
+        "value": "jane@example.com",
+        "raw": "jane@example.com",
+        "confidence": 1.0,
+        "extraction_method": "regex",
+        "notes": []
+      },
+      "phone": {
+        "value": "skip",
+        "raw": "skip",
+        "confidence": 1.0,
+        "extraction_method": "regex"
+      }
+    }
+  }
+]

@@ -1,19 +1,19 @@
-"""Evaluation script for the Dynamic Intake Form Agent."""
+"""Enhanced evaluation script for the Dynamic Intake Form Agent."""
 
 import sys
+import json
+import time
+import argparse
 from pathlib import Path
+from typing import List, Dict, Any, Optional
+from dataclasses import dataclass
+from unittest.mock import MagicMock, patch
 
 # Add project root to path
-if Path(__file__).parent.name == "src":
-    project_root = Path(__file__).parent.parent
-    if str(project_root) not in sys.path:
-        sys.path.insert(0, str(project_root))
+project_root = Path(__file__).parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
-import time
-import asyncio
-import json
-from typing import List, Dict, Any
-from dataclasses import dataclass
 from langchain_core.messages import HumanMessage
 from langgraph.checkpoint.memory import MemorySaver
 
@@ -29,42 +29,10 @@ class TestCase:
     expected_values: Dict[str, Any]
     mode: str = "hybrid"
 
-TEST_CASES = [
-    TestCase(
-        id="simple_happy_path",
-        description="Simple inputs, no clarification needed",
-        inputs=[
-            "John Doe",
-            "john@example.com",
-            "555-123-4567",
-            "25"
-        ],
-        expected_values={
-            "name": "John Doe",
-            "email": "john@example.com",
-            "phone": "(555) 123-4567",
-            "age": 25.0
-        },
-        mode="speed"
-    ),
-    TestCase(
-        id="complex_input_quality",
-        description="Complex inputs requiring LLM extraction",
-        inputs=[
-            "My name is Sarah Connor",
-            "You can reach me at sarah.connor@skynet.com",
-            "Call me at 555-987-6543",
-            "I am thirty years old"
-        ],
-        expected_values={
-            "name": "Sarah Connor",
-            "email": "sarah.connor@skynet.com",
-            "phone": "(555) 987-6543",
-            "age": 30.0
-        },
-        mode="quality"
-    )
-]
+def load_test_cases(path: str) -> List[TestCase]:
+    with open(path, "r") as f:
+        data = json.load(f)
+    return [TestCase(**item) for item in data]
 
 def create_test_schema():
     return {
@@ -96,8 +64,6 @@ def create_test_schema():
         ]
     }
 
-from unittest.mock import MagicMock, patch
-
 def mock_llm_response(prompt):
     content = prompt[0].content
     if "Generate a natural, conversational question" in content:
@@ -120,7 +86,7 @@ def mock_llm_response(prompt):
         
     return "I don't know"
 
-def run_test_case(test_case: TestCase):
+def run_test_case(test_case: TestCase) -> Dict[str, Any]:
     print(f"\nRunning Test Case: {test_case.id}")
     print(f"Description: {test_case.description}")
     print(f"Mode: {test_case.mode}")
@@ -130,7 +96,7 @@ def run_test_case(test_case: TestCase):
     set_config(config)
     checkpointer = MemorySaver()
     
-    # Mock LLM if in quality mode
+    # Mock LLM
     with patch('src.modes.get_llm') as mock_get_llm:
         mock_llm = MagicMock()
         mock_llm.invoke.side_effect = lambda x: MagicMock(content=mock_llm_response(x))
@@ -165,7 +131,7 @@ def run_test_case(test_case: TestCase):
         
         while not current_state.values.get("is_complete") and input_idx < len(test_case.inputs):
             user_input = test_case.inputs[input_idx]
-            print(f"  Input: {user_input}")
+            # print(f"  Input: {user_input}")
             
             graph.update_state(
                 config_run,
@@ -184,32 +150,101 @@ def run_test_case(test_case: TestCase):
         # Verify results
         collected = current_state.values.get("collected_fields", {})
         passed = True
+        failures = []
         
-        print("  Results:")
         for field_id, expected in test_case.expected_values.items():
             actual = collected.get(field_id, {}).get("value")
             match = str(actual) == str(expected)
-            status = "✅" if match else "❌"
             if not match:
                 passed = False
-            print(f"    {status} {field_id}: Expected '{expected}', Got '{actual}'")
+                failures.append(f"{field_id}: Expected '{expected}', Got '{actual}'")
+        
+        status = "PASSED" if passed else "FAILED"
+        print(f"  Status: {status} ({duration:.2f}s)")
+        if not passed:
+            for f in failures:
+                print(f"    ❌ {f}")
+                
+        return {
+            "id": test_case.id,
+            "passed": passed,
+            "duration": duration,
+            "failures": failures,
+            "collected": collected
+        }
+
+def compare_results(current: List[Dict], previous: List[Dict]):
+    print("\n=== Regression Report ===")
+    prev_map = {r["id"]: r for r in previous}
+    
+    for curr in current:
+        prev = prev_map.get(curr["id"])
+        if not prev:
+            print(f"🆕 {curr['id']}: New test case")
+            continue
             
-        print(f"  Duration: {duration:.2f}s")
-        print(f"  Status: {'PASSED' if passed else 'FAILED'}")
-        return passed
+        if curr["passed"] != prev["passed"]:
+            status = "🔴 BROKEN" if prev["passed"] and not curr["passed"] else "🟢 FIXED"
+            print(f"{status} {curr['id']}")
+        
+        # Latency check (warn if > 50% slower)
+        if curr["duration"] > prev["duration"] * 1.5:
+            print(f"⚠️  {curr['id']}: Latency regression ({prev['duration']:.2f}s -> {curr['duration']:.2f}s)")
+
+def main():
+    parser = argparse.ArgumentParser(description="Run intake form agent evaluations")
+    parser.add_argument("--mode", choices=["speed", "quality", "hybrid", "all"], default="all", help="Test mode filter")
+    parser.add_argument("--save", action="store_true", help="Save results to eval_results.json")
+    parser.add_argument("--diff", action="store_true", help="Compare with previous results")
+    args = parser.parse_args()
+    
+    # Load cases
+    cases_path = Path(__file__).parent / "data" / "eval_cases.json"
+    cases = load_test_cases(str(cases_path))
+    
+    # Filter cases
+    if args.mode != "all":
+        cases = [c for c in cases if c.mode == args.mode]
+    
+    print(f"Running {len(cases)} test cases...")
+    results = []
+    
+    for case in cases:
+        try:
+            result = run_test_case(case)
+            results.append(result)
+        except Exception as e:
+            print(f"❌ Error running {case.id}: {e}")
+            results.append({
+                "id": case.id,
+                "passed": False,
+                "duration": 0,
+                "failures": [str(e)],
+                "collected": {}
+            })
+            
+    # Summary
+    passed_count = sum(1 for r in results if r["passed"])
+    print(f"\nSummary: {passed_count}/{len(results)} Passed")
+    
+    # Diff
+    if args.diff:
+        results_path = Path("eval_results.json")
+        if results_path.exists():
+            with open(results_path, "r") as f:
+                prev_results = json.load(f)
+            compare_results(results, prev_results)
+        else:
+            print("\n⚠️  No previous results found for diff.")
+            
+    # Save
+    if args.save:
+        with open("eval_results.json", "w") as f:
+            json.dump(results, f, indent=2, default=str)
+        print("\nResults saved to eval_results.json")
+        
+    if passed_count < len(results):
+        sys.exit(1)
 
 if __name__ == "__main__":
-    print("Starting Evaluation...")
-    results = []
-    for test_case in TEST_CASES:
-        try:
-            passed = run_test_case(test_case)
-            results.append(passed)
-        except Exception as e:
-            print(f"  ❌ Error: {e}")
-            results.append(False)
-            
-    print("\nSummary:")
-    print(f"Total Tests: {len(results)}")
-    print(f"Passed: {sum(results)}")
-    print(f"Failed: {len(results) - sum(results)}")
+    main()

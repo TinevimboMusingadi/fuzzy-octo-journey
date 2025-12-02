@@ -45,6 +45,11 @@ cd src
 python main.py
 ```
 
+5. Run evaluations:
+```bash
+python evals/run_eval.py
+```
+
 ## Project Structure
 
 ```

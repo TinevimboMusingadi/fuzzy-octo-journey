@@ -106,6 +106,31 @@ Run the interactive demo:
 python src/main.py
 ```
 
+## Running Evaluations
+
+The project includes an enhanced evaluation engine to verify performance and accuracy.
+
+Run all evaluations:
+```bash
+python evals/run_eval.py
+```
+
+Run specific mode:
+```bash
+python evals/run_eval.py --mode speed
+```
+
+Save results and compare (regression testing):
+```bash
+# First run (baseline)
+python evals/run_eval.py --save
+
+# Make changes...
+
+# Second run (compare)
+python evals/run_eval.py --diff
+```
+
 ## Modes
 
 ### Speed Mode
