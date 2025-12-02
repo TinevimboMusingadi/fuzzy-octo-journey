@@ -10,11 +10,14 @@ pip install -r requirements.txt
 2. Set up environment variables (optional, for Quality mode):
 Create a `.env` file:
 ```
-OPENAI_API_KEY=your_api_key_here
+GOOGLE_API_KEY=your_api_key_here
 DEFAULT_MODE=hybrid
-LLM_MODEL=gpt-4o-mini
+LLM_MODEL=gemini-1.5-flash
+LLM_PROVIDER=google
 LLM_TEMPERATURE=0.3
 ```
+
+**Note:** The project now uses Google's Gemini API by default. You can get a free API key from [Google AI Studio](https://makersuite.google.com/app/apikey).
 
 ## Running Tests
 
