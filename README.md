@@ -43,6 +43,9 @@ python src/main.py
 # Or from src directory:
 cd src
 python main.py
+
+# Or with a specific mode:
+python main.py --mode speed
 ```
 
 5. Run evaluations:
@@ -61,7 +64,16 @@ python evals/run_eval.py
 │   ├── modes.py              # Speed/Quality mode implementations
 │   ├── validation.py         # Validation logic
 │   ├── config.py             # Configuration
-│   └── utils.py              # Helper functions
+│   ├── utils.py              # Helper functions
+│   ├── output_handlers.py    # Data output handlers
+│   └── main.py               # Entry point
+├── evals/
+│   ├── run_eval.py           # Evaluation script
+│   └── data/
+│       └── eval_cases.json   # Test cases
+├── output/                   # Saved form submissions
+│   ├── submissions.csv       # CSV log of all submissions
+│   └── form_submission_*.json # Individual JSON files
 ├── tests/
 │   ├── __init__.py
 │   ├── test_graph.py
@@ -69,6 +81,24 @@ python evals/run_eval.py
 │   ├── test_modes.py
 │   └── test_validation.py
 ├── requirements.txt
+├── ARCHITECTURE.md           # Detailed architecture docs
+├── INTEGRATION.md            # Integration guide
 └── README.md
 ```
+
+## What Happens After Collection?
+
+After collecting form data, the agent automatically:
+
+1. **Saves to JSON**: Each submission is saved as a timestamped JSON file in `output/`
+2. **Appends to CSV**: All submissions are logged to `output/submissions.csv` for easy analysis
+3. **Includes Metadata**: Saves extraction method, confidence scores, and any notes
+
+See [INTEGRATION.md](INTEGRATION.md) for advanced integrations:
+- Webhook/API integration
+- Database storage
+- CRM integration (Salesforce, HubSpot)
+- Email notifications
+- Google Sheets export
+
 

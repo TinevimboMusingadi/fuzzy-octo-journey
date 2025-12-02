@@ -1,0 +1,37 @@
+{
+  "timestamp": "2025-12-03T01:28:52.990510",
+  "data": {
+    "name": {
+      "value": "Test User",
+      "raw": "Test User",
+      "confidence": 1.0,
+      "extraction_method": "regex",
+      "notes": []
+    },
+    "email": {
+      "value": "test@example.com",
+      "raw": "test@example.com",
+      "confidence": 1.0,
+      "extraction_method": "regex",
+      "notes": []
+    },
+    "phone": {
+      "value": "(555) 123-4567",
+      "raw": "555-123-4567",
+      "confidence": 1.0,
+      "extraction_method": "regex",
+      "notes": []
+    },
+    "age": {
+      "value": 25.0,
+      "raw": "25",
+      "confidence": 1.0,
+      "extraction_method": "regex",
+      "notes": []
+    }
+  },
+  "metadata": {
+    "mode": "speed",
+    "form_id": "sample_form"
+  }
+}

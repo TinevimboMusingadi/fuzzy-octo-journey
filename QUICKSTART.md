@@ -104,6 +104,9 @@ result = graph.invoke(state)
 Run the interactive demo:
 ```bash
 python src/main.py
+
+# Or with a specific mode:
+python src/main.py --mode speed
 ```
 
 ## Running Evaluations

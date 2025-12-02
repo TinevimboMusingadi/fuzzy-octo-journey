@@ -149,6 +149,10 @@ def run_interactive_demo():
         if not user_input:
             continue
             
+        if user_input.lower() in ["quit", "exit"]:
+            print("Goodbye!")
+            break
+            
         # Update state with user input and resume
         # We need to add the human message to the state
         # The 'process' node expects the last message to be the user's answer
@@ -172,16 +176,47 @@ def run_interactive_demo():
     print("Form Complete!")
     print("=" * 60)
     print("\nCollected Data:")
-    print("\nCollected Data:")
     final_state = graph.get_state(config_run).values
-    for field_id, data in final_state.get("collected_fields", {}).items():
+    collected_fields = final_state.get("collected_fields", {})
+    
+    for field_id, data in collected_fields.items():
         value = data.get("value", "N/A")
         notes = data.get("notes", [])
         print(f"  {field_id}: {value}")
         if notes:
             print(f"    Notes: {', '.join(notes)}")
+    
+    # Save the data
+    print("\n" + "=" * 60)
+    print("Saving Data...")
+    print("=" * 60)
+    
+    from src.output_handlers import JSONOutputHandler, CSVOutputHandler
+    
+    # Save as JSON
+    json_handler = JSONOutputHandler()
+    json_path = json_handler.save(collected_fields, metadata={
+        "mode": config.default_mode,
+        "form_id": "sample_form"
+    })
+    print(f"✅ Saved to JSON: {json_path}")
+    
+    # Append to CSV
+    csv_handler = CSVOutputHandler()
+    csv_path = csv_handler.save(collected_fields)
+    print(f"✅ Appended to CSV: {csv_path}")
+    
+    print("\n" + "=" * 60)
 
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Run interactive intake form agent")
+    parser.add_argument("--mode", choices=["speed", "quality", "hybrid"], help="Override default mode")
+    args = parser.parse_args()
+    
+    if args.mode:
+        os.environ["DEFAULT_MODE"] = args.mode
+        
     run_interactive_demo()
 
