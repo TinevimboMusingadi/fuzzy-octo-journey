@@ -12,9 +12,14 @@ Create a `.env` file:
 ```
 GOOGLE_API_KEY=your_api_key_here
 DEFAULT_MODE=hybrid
-LLM_MODEL=gemini-1.5-flash
+LLM_MODEL=gemini-3-pro-preview
 LLM_PROVIDER=google
 LLM_TEMPERATURE=0.3
+
+# Available Gemini models:
+# - gemini-3-pro-preview (latest preview - default)
+# - gemini-1.5-pro (stable alternative)
+# - gemini-1.5-flash (faster, lighter alternative)
 ```
 
 **Note:** The project now uses Google's Gemini API by default. You can get a free API key from [Google AI Studio](https://makersuite.google.com/app/apikey).

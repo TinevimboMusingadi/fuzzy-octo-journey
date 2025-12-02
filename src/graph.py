@@ -16,7 +16,7 @@ from src.nodes import (
 )
 
 
-def create_intake_graph():
+def create_intake_graph(checkpointer=None):
     """Create and compile the intake form LangGraph."""
     graph = StateGraph(FormState)
     
@@ -58,5 +58,8 @@ def create_intake_graph():
     
     graph.add_edge("output", END)
     
-    return graph.compile()
+    return graph.compile(
+        checkpointer=checkpointer,
+        interrupt_before=["process"]
+    )
 

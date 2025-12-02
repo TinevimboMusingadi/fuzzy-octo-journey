@@ -20,9 +20,14 @@ pip install -r requirements.txt
 # Create .env file with your Google API key:
 GOOGLE_API_KEY=your_api_key_here
 DEFAULT_MODE=hybrid
-LLM_MODEL=gemini-1.5-flash
+LLM_MODEL=gemini-3-pro-preview
 LLM_PROVIDER=google
 LLM_TEMPERATURE=0.3
+
+# Available Gemini models:
+# - gemini-3-pro-preview (latest preview)
+# - gemini-1.5-pro (stable)
+# - gemini-1.5-flash (faster, lighter)
 ```
 
 3. Run tests:

@@ -4,3 +4,4 @@ __pycache__/
 .env.example
 .pytest_cache/
 .pytest_cache/
+commit.txt

@@ -10,6 +10,12 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 from langchain_core.language_models.chat_models import BaseChatModel
 
+# Import Google API exceptions for better error handling
+try:
+    from google.api_core import exceptions as google_exceptions
+except ImportError:
+    google_exceptions = None
+
 from src.utils import summarize_context
 from src.config import AgentConfig
 
@@ -23,10 +29,23 @@ def get_llm(config: AgentConfig) -> BaseChatModel:
     global _llm
     if _llm is None:
         if config.llm_provider == "google":
+            # Use API key from config or environment variable
+            api_key = config.google_api_key
+            if not api_key:
+                import os
+                api_key = os.getenv("GOOGLE_API_KEY")
+            
+            if not api_key:
+                raise ValueError(
+                    "GOOGLE_API_KEY not found. Please set it in environment or config. "
+                    "Get your API key from: https://makersuite.google.com/app/apikey"
+                )
+            
             _llm = ChatGoogleGenerativeAI(
                 model=config.llm_model,
                 temperature=config.llm_temperature,
-                google_api_key=config.google_api_key
+                google_api_key=api_key,
+                max_retries=1  # Reduce retries to fail faster and trigger fallback
             )
         else:
             _llm = ChatOpenAI(
@@ -73,9 +92,10 @@ def ask_speed(field: Dict[str, Any], context: Dict[str, Any]) -> str:
 
 def ask_quality(field: Dict[str, Any], context: Dict[str, Any], config: AgentConfig) -> str:
     """Quality mode: LLM-generated contextual question."""
-    llm = get_llm(config)
-    
-    prompt = f"""Generate a natural, conversational question to collect:
+    try:
+        llm = get_llm(config)
+        
+        prompt = f"""Generate a natural, conversational question to collect:
 
 Field: {field.get('label', '')}
 Type: {field.get('field_type', 'text')}
@@ -91,9 +111,14 @@ Requirements:
 - Keep it concise (1-2 sentences)
 
 Question:"""
-    
-    response = llm.invoke([HumanMessage(content=prompt)])
-    return response.content
+        
+        response = llm.invoke([HumanMessage(content=prompt)])
+        return response.content
+    except (Exception, KeyboardInterrupt) as e:
+        # Fallback to speed mode on any error (including model not found, API errors, etc.)
+        if config.fallback_on_error:
+            return ask_speed(field, context)
+        raise
 
 
 # ==================== PROCESS NODE ====================
@@ -197,9 +222,10 @@ def process_speed(user_input: str, field: Dict[str, Any]) -> Dict[str, Any]:
 
 def process_quality(user_input: str, field: Dict[str, Any], config: AgentConfig) -> Dict[str, Any]:
     """Quality mode: LLM-based extraction."""
-    llm = get_llm(config)
-    
-    prompt = f"""Extract the {field.get('field_type', 'text')} value from this response.
+    try:
+        llm = get_llm(config)
+        
+        prompt = f"""Extract the {field.get('field_type', 'text')} value from this response.
 
 Field: {field.get('label', '')}
 Type: {field.get('field_type', 'text')}
@@ -214,16 +240,17 @@ Return JSON:
 }}
 
 JSON:"""
-    
-    try:
+        
         response = llm.invoke([HumanMessage(content=prompt)])
         result = json.loads(response.content)
         result["raw"] = user_input
         result["extraction_method"] = "llm"
         return result
-    except Exception as e:
-        # Fallback to speed mode
-        return process_speed(user_input, field)
+    except (Exception, KeyboardInterrupt) as e:
+        # Fallback to speed mode on any error (including model not found, API errors, etc.)
+        if config.fallback_on_error:
+            return process_speed(user_input, field)
+        raise
 
 
 # ==================== VALIDATE NODE ====================
@@ -303,9 +330,10 @@ def clarify_quality(
     config: AgentConfig
 ) -> str:
     """Quality mode: LLM-generated clarification."""
-    llm = get_llm(config)
-    
-    prompt = f"""Generate a helpful clarification request.
+    try:
+        llm = get_llm(config)
+        
+        prompt = f"""Generate a helpful clarification request.
 
 Field: {field.get('label', '')}
 Type: {field.get('field_type', 'text')}
@@ -321,9 +349,14 @@ Requirements:
 - Keep it concise
 
 Clarification:"""
-    
-    response = llm.invoke([HumanMessage(content=prompt)])
-    return response.content
+        
+        response = llm.invoke([HumanMessage(content=prompt)])
+        return response.content
+    except (Exception, KeyboardInterrupt) as e:
+        # Fallback to speed mode on any error (including model not found, API errors, etc.)
+        if config.fallback_on_error:
+            return clarify_speed(field, errors, attempt)
+        raise
 
 
 # ==================== ANNOTATE NODE ====================
@@ -364,9 +397,10 @@ def annotate_speed(raw_response: str) -> list:
 
 def annotate_quality(collected: Dict[str, Any], state: Dict[str, Any], config: AgentConfig) -> list:
     """Quality mode: LLM-based annotation."""
-    llm = get_llm(config)
-    
-    prompt = f"""Analyze this response for any notable observations.
+    try:
+        llm = get_llm(config)
+        
+        prompt = f"""Analyze this response for any notable observations.
 
 Field: {state.get('current_field_id', 'unknown')}
 User said: "{collected.get('raw', '')}"
@@ -386,10 +420,12 @@ Return JSON array of notes (empty if nothing notable):
 ["note 1", "note 2"]
 
 Notes:"""
-    
-    try:
+        
         response = llm.invoke([HumanMessage(content=prompt)])
         return json.loads(response.content)
-    except:
+    except (Exception, KeyboardInterrupt) as e:
+        # Fallback to speed mode on any error (including model not found, API errors, etc.)
+        if config.fallback_on_error:
+            return annotate_speed(collected.get('raw', ''))
         return []
 
