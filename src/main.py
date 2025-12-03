@@ -63,10 +63,10 @@ def create_sample_schema():
 def run_interactive_demo():
     """Run an interactive demo of the intake form agent."""
     # Load configuration
-    # Available Gemini models: gemini-1.5-pro, gemini-1.5-flash, gemini-3-pro-preview
+    # Available Gemini models: gemini-2.5-pro (tested and works!), gemini-1.5-pro, gemini-1.5-flash
     config = AgentConfig(
         default_mode=os.getenv("DEFAULT_MODE", "hybrid"),
-        llm_model=os.getenv("LLM_MODEL", "gemini-3-pro-preview"),
+        llm_model=os.getenv("LLM_MODEL", "gemini-2.5-pro"),
         llm_provider=os.getenv("LLM_PROVIDER", "google"),
         google_api_key=os.getenv("GOOGLE_API_KEY"),
         fallback_on_error=True  # Always fallback to speed mode on LLM errors
