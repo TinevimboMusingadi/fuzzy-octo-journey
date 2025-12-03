@@ -1,0 +1,37 @@
+{
+  "timestamp": "2025-12-03T01:34:38.774896",
+  "data": {
+    "name": {
+      "value": "tine",
+      "raw": "tine",
+      "confidence": 1.0,
+      "extraction_method": "regex",
+      "notes": []
+    },
+    "email": {
+      "value": "tine@gmail.com",
+      "raw": "tine@gmail.com",
+      "confidence": 1.0,
+      "extraction_method": "regex",
+      "notes": []
+    },
+    "phone": {
+      "value": "(098) 567-9823",
+      "raw": "0985679823",
+      "confidence": 1.0,
+      "extraction_method": "regex",
+      "notes": []
+    },
+    "age": {
+      "value": 32.0,
+      "raw": "32",
+      "confidence": 1.0,
+      "extraction_method": "regex",
+      "notes": []
+    }
+  },
+  "metadata": {
+    "mode": "hybrid",
+    "form_id": "sample_form"
+  }
+}

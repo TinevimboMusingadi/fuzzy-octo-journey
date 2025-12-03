@@ -116,6 +116,7 @@ Question:"""
         return response.content
     except (Exception, KeyboardInterrupt) as e:
         # Fallback to speed mode on any error (including model not found, API errors, etc.)
+        print(f"\n⚠️  LLM Error in ask_quality: {type(e).__name__}: {e}")
         if config.fallback_on_error:
             return ask_speed(field, context)
         raise
