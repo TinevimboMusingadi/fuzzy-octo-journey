@@ -8,6 +8,8 @@ This module provides a clean API for:
 
 from typing import Dict, Any
 
+from langgraph.checkpoint.memory import MemorySaver
+
 from src.config import AgentConfig
 from src.graph import create_intake_graph
 from src.nodes import set_config
@@ -29,7 +31,10 @@ def create_session(form_id: str, mode: str = "hybrid") -> Dict[str, Any]:
     config = AgentConfig(default_mode=mode)
     set_config(config)
 
-    graph = create_intake_graph(checkpointer=None)
+    # For V2.0 CLI/API usage we always use an in-memory checkpointer so that
+    # `graph.get_state` works as expected between steps.
+    checkpointer = MemorySaver()
+    graph = create_intake_graph(checkpointer=checkpointer)
 
     fields = schema.get("fields", [])
     if not fields:
@@ -51,6 +56,7 @@ def create_session(form_id: str, mode: str = "hybrid") -> Dict[str, Any]:
         "graph": graph,
         "state": initial_state,
         "config": config,
+        "checkpointer": checkpointer,
     }
 
 

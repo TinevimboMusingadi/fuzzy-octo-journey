@@ -7,9 +7,13 @@ Example usage:
 
 import argparse
 
+from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
 
 from src.v2.session import create_session
+
+# Load environment variables (including GOOGLE_API_KEY) from .env if present
+load_dotenv()
 
 
 def run_cli(form_id: str, mode: str) -> None:
